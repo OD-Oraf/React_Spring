@@ -5,7 +5,9 @@ import {
     Layout,
     Menu,
     Breadcrumb,
-    Table
+    Table,
+    Spin,
+    Empty
 } from 'antd';
 //Icons
 import {
@@ -14,6 +16,7 @@ import {
     FileOutlined,
     TeamOutlined,
     UserOutlined,
+    LoadingOutlined
 } from '@ant-design/icons';
 import './App.css';
 
@@ -43,10 +46,15 @@ const columns = [
     },
 ];
 
+const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+
 
 function App() {
+    //Loader
+
     const[students, setStudents] = useState([]);
     const [collapsed, setCollapsed] = useState(false)
+    const [fetching, setFetching] = useState(true);
 
     const fetchStudents = () =>
         getAllStudents()
@@ -56,6 +64,8 @@ function App() {
                 console.log(data);
                 //Load student data into state
                 setStudents(data);
+                //Set loading to false after loading data
+                setFetching(false);
             })
 
     //when component loads call fetch students
@@ -65,10 +75,21 @@ function App() {
     },[]);
 
     const renderStudents = () => {
-        if (students.length <= 0){
-            return "no data available";
+        if (fetching){
+            return <Spin indicator={antIcon} />
         }
-        return <Table dataSource={students} columns={columns} />;
+        if (students.length <= 0){
+            return <Empty />;
+        }
+        return <Table
+            dataSource={students}
+            columns={columns}
+            bordered
+            title={() => 'Students '}
+            pagination={{ pageSize : 50 }}
+            scroll={{ y : 240 }}
+            rowKey={(student) => student.id}
+        />;
     }
 
     return (
